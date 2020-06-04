@@ -111,7 +111,7 @@ def tags_cli():
         print(f"set{corecmd}")
 
 # File location:
-file = r"/Users/rcameron/Documents/pan-ss2fw-tools/wb23.xlsx"
+file = r"wb23.xlsx"
 
 # Run the function to return a dictionary of all tables in the Excel workbook
 tables_dict = get_all_tables(filename=file)
