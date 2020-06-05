@@ -100,6 +100,9 @@ def security_cli():
     # Process Addresses Table
     header1("Print the SecurityPolicy dataframe")
     print(security_df)
+    """
+    - [ ] SecurityPolicy Function
+    """
     for _, row in security_df.iterrows():
         header2(f"{row['mod-type']} {row['name']}")
 
