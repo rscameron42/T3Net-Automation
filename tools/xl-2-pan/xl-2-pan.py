@@ -18,7 +18,7 @@ __copyright__ = "Copyright 2020, Remove kp-all Policy Cleanup"
 __credits__ = ["Ron Cameron"]
 
 __license__ = '{license}'
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __maintainer__ = "Ron Cameron"
 __email__ = "rscameron@gmail.com"
 __status__ = '{dev_status}'
@@ -41,7 +41,7 @@ import pandas as pd
 #from {path} import {class}
 # […]
 
-def get_all_tables(filename):
+def get_all_tables(filename): # REVIEW - using just the dictionary and not Pandas dataframe
     """ Get all tables from a given workbook. Returns a dictionary of tables. 
         Requires a filename, which includes the file path and filename. """
 
@@ -87,7 +87,6 @@ def get_all_tables(filename):
             
             # Add the dataframe to the dictionary of tables
             tables_dict[tbl.name]['dataframe'] = df
-
     return tables_dict
 
 # Define levels of headers for readability and CLI code seperation
@@ -96,15 +95,57 @@ def header1(msg):
 def header2(msg):
     print(f"\n{'-' * 90}\n---- {msg}\n{'-' * 90}")
 
-def security_cli():
+def security_cli():  # TODO - Finish Security Policy CLI Function  
     # Process Addresses Table
     header1("Print the SecurityPolicy dataframe")
     print(security_df)
-    """
-    - [ ] SecurityPolicy Function
-    """
     for _, row in security_df.iterrows():
-        header2(f"{row['mod-type']} {row['name']}")
+        header2(f"{row['operation']} {row['name']}")
+        corecmd = "rulebase security rules \"" + row["name"] + "\""
+        clonecmd = "rulebase security rules \"" + str(row["clone"]) + "\" to \"" + row["name"] + "\""
+        if row["device-group"]:
+            corecmd = "device-group " + row["device-group"] + " " + row["dg_rulebase"] + "-" + corecmd
+            clonecmd = "device-group " + row["device-group"] + " " + row["dg_rulebase"] + "-" + clonecmd
+        if row["operation"] == "delete":
+            print(f"delete {corecmd}")
+            continue
+        if (row["operation"] == "create") and (row["clone"]):
+            print(f"copy {clonecmd}")
+            print(f"move {corecmd} {row['position']} \"{row['relation_to']}\"")
+        if row["disabled"]:
+            print(f"set {corecmd} disabled {row['disabled']}")
+        if row["tag_mod"] == "replace": 
+            print(f"delete {corecmd} tag" ) 
+        if row["tag"]:
+            print(f"set {corecmd} tag [ {row['tag']} ]")
+        if row["from_mod"] == "replace": 
+            print(f"delete {corecmd} from" ) 
+        if row["from"]:
+            print(f"set {corecmd} from [ {row['from']} ]")
+        if row["source_mod"] == "replace": 
+            print(f"delete {corecmd} source" ) 
+        if row["source"]:
+            print(f"set {corecmd} source [ {row['source']} ]")
+        if row["to_mod"] == "replace": 
+            print(f"delete {corecmd} to" ) 
+        if row["to"]:
+            print(f"set {corecmd} to [ {row['to']} ]")
+        if row["destination_mod"] == "replace": 
+            print(f"delete {corecmd} destination" ) 
+        if row["destination"]:
+            print(f"set {corecmd} destination [ {row['destination']} ]")
+        if row["app_mod"] == "replace": 
+            print(f"delete {corecmd} application" ) 
+        if row["application"]:
+            print(f"set {corecmd} application [ {row['application']} ]")
+        if row["service_mod"] == "replace": 
+            print(f"delete {corecmd} service" ) 
+        if row["service"]:
+            print(f"set {corecmd} service [ {row['service']} ]")
+        if row["action"]:
+            print(f"set {corecmd} action {row['action']}")
+        if row["description"]:
+            print(f"set {corecmd} description \"{row['description']}\"")
 
 def addresses_cli():
     # Process Addresses Table
@@ -112,16 +153,16 @@ def addresses_cli():
     print(addr_df)
     for _, row in addr_df.iterrows():
         header2(f"Add / Modify {row['name']}")
-        corecmd = " address " + row["name"] + " "
+        corecmd = "address " + row["name"]
         if row["device-group"]:
-            corecmd = " device-group " + row["device-group"] + corecmd
-        print(f"set{corecmd}{row['type']} {row['address']}")
+            corecmd = "device-group " + row["device-group"] + " " + corecmd
+        print(f"set {corecmd} {row['type']} {row['address']}")
         if row["tag_mod"] == "replace": 
-            print(f"delete{corecmd}tag" ) 
+            print(f"delete {corecmd} tag" ) 
         if row["tag"]:
-            print(f"set{corecmd}tag [ {row['tag']} ]")
+            print(f"set {corecmd} tag [ {row['tag']} ]")
         if row["description"]:
-            print(f"set{corecmd}description \"{row['description']}\"")
+            print(f"set {corecmd} description \"{row['description']}\"")
 
 def addressgroups_cli():
     # Process Address Groups Table
@@ -129,21 +170,21 @@ def addressgroups_cli():
     print(addrgrp_df)
     for _, row in addrgrp_df.iterrows():
         header2(f"Add / Modify {row['name']}")
-        corecmd = " address-group " + row["name"] + " "
+        corecmd = "address-group " + row["name"]
         if row["device-group"]:
-            corecmd = " device-group " + row["device-group"] + corecmd
+            corecmd = "device-group " + row["device-group"] + " " + corecmd
         if row["type"] == "dynamic":
-            print(f"set{corecmd}{row['type']} filter \"{row['filter']}\"")
+            print(f"set {corecmd} {row['type']} filter \"{row['filter']}\"")
         else:
             if row["members_mod"] == "replace":
-                 print(f"delete{corecmd}members" )
-            print(f"set{corecmd}members [ {row['members']} ]")
+                 print(f"delete {corecmd} members" )
+            print(f"set {corecmd} members [ {row['members']} ]")
         if row["tag_mod"] == "replace": 
-            print(f"delete{corecmd}tag" ) 
+            print(f"delete {corecmd} tag" ) 
         if row["tag"]:
-            print(f"set{corecmd}tag [ {row['tag']} ]")
+            print(f"set {corecmd} tag [ {row['tag']} ]")
         if row["description"]:
-            print(f"set{corecmd}description \"{row['description']}\"")
+            print(f"set {corecmd} description \"{row['description']}\"")
 
 def tags_cli():
     # Process Tags Table
@@ -151,14 +192,14 @@ def tags_cli():
     print(tag_df)
     for _, row in tag_df.iterrows():
         header2(f"Add / Modify {row['name']}")
-        corecmd = " tag " + row["name"] + " "
+        corecmd = "tag " + row["name"]
         if row["device-group"]:
-            corecmd = " device-group " + row["device-group"] + corecmd
+            corecmd = "device-group " + row["device-group"] + " " + corecmd
         if row["color"]:
-            corecmd = corecmd + "color " + row["color"] + " "
+            corecmd = corecmd + "color " + row["color"]
         if row["comments"]:
-            corecmd = corecmd + "comments \"" + row["comments"] + "\""
-        print(f"set{corecmd}")
+            corecmd = corecmd + " comments \"" + row["comments"] + "\""
+        print(f"set {corecmd}")
 
 def services_cli():
     # Process Services Table
@@ -166,19 +207,19 @@ def services_cli():
     print(service_df)
     for _, row in service_df.iterrows():
         header2(f"Add / Modify {row['name']}")
-        corecmd = " service " + row["name"] + " "
+        corecmd = "service " + row["name"]
         if row["device-group"]:
-            corecmd = " device-group " + row["device-group"] + corecmd
+            corecmd = "device-group " + row["device-group"] + " " + corecmd
         svcproto = "protcol " + row["protocol"] + " port " + str(row["port"])
         if row["source-port"]:
             svcproto = svcproto + " source-port " + row["source-port"]
-        print(f"set{corecmd}{svcproto}")
+        print(f"set {corecmd} {svcproto}")
         if row["tag_mod"] == "replace": 
-            print(f"delete{corecmd}tag" ) 
+            print(f"delete {corecmd} tag" ) 
         if row["tag"]:
-            print(f"set{corecmd}tag [ {row['tag']} ]")
+            print(f"set {corecmd} tag [ {row['tag']} ]")
         if row["description"]:
-            print(f"set{corecmd}description \"{row['description']}\"")
+            print(f"set {corecmd} description \"{row['description']}\"")
 
 def servicegroups_cli():
     # Process Service Groups Table
@@ -186,20 +227,21 @@ def servicegroups_cli():
     print(svcgrp_df)
     for _, row in svcgrp_df.iterrows():
         header2(f"Add / Modify {row['name']}")
-        corecmd = " service-group " + row["name"] + " "
+        corecmd = "service-group " + row["name"]
         if row["device-group"]:
-            corecmd = " device-group " + row["device-group"] + corecmd
+            corecmd = "device-group " + row["device-group"] + " " + corecmd
         if row["tag_mod"] == "replace": 
-            print(f"delete{corecmd}tag" )
+            print(f"delete {corecmd} tag" )
         if row["tag"]:
-            print(f"set{corecmd}tag [ {row['tag']} ]")
+            print(f"set {corecmd} tag [ {row['tag']} ]")
         if row["members_mod"] == "replace": 
-            print(f"delete{corecmd}members" )
+            print(f"delete {corecmd} members")
         if row["members"]:
-            print(f"set{corecmd}tag [ {row['members']} ]")
+            print(f"set {corecmd} members [ {row['members']} ]")
 
 # File location:
-file = r"xl-tmplt.xlsx"
+#file = r"xl-tmplt.xlsx"
+file = r"/Users/rcameron/Downloads/xl-tmplt.xlsx"
 
 # Run the function to return a dictionary of all tables in the Excel workbook
 tables_dict = get_all_tables(filename=file)
@@ -217,4 +259,4 @@ addresses_cli()
 addressgroups_cli()
 services_cli()
 servicegroups_cli()
-#security_cli()
+security_cli()
