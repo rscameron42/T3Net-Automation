@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
-		"markdown-todo.sortByCount": false
+		"markdown-todo.sortByCount": false,
+
 	}
 }

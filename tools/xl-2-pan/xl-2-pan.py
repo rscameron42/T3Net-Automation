@@ -18,7 +18,7 @@ __copyright__ = "Copyright 2020, Remove kp-all Policy Cleanup"
 __credits__ = ["Ron Cameron"]
 
 __license__ = '{license}'
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __maintainer__ = "Ron Cameron"
 __email__ = "rscameron@gmail.com"
 __status__ = '{dev_status}'
@@ -29,7 +29,7 @@ __status__ = '{dev_status}'
 
 # Built-in/Generic Imports
 #import os
-#import sys
+import sys, getopt
 # […]
 
 # Libs
@@ -100,17 +100,20 @@ def security_cli():  # TODO - Finish Security Policy CLI Function
     header1("Print the SecurityPolicy dataframe")
     print(security_df)
     for _, row in security_df.iterrows():
-        header2(f"{row['operation']} {row['name']}")
+        header2(f"{row['operation']} Security Policy: {row['name']}")
         corecmd = "rulebase security rules \"" + row["name"] + "\""
-        clonecmd = "rulebase security rules \"" + str(row["clone"]) + "\" to \"" + row["name"] + "\""
+        clonecmd = "rulebase security rules \"" + str(row["src_rule"]) + "\" to \"" + row["name"] + "\""
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + row["dg_rulebase"] + "-" + corecmd
             clonecmd = "device-group " + row["device-group"] + " " + row["dg_rulebase"] + "-" + clonecmd
         if row["operation"] == "delete":
             print(f"delete {corecmd}")
             continue
-        if (row["operation"] == "create") and (row["clone"]):
+        if (row["operation"] == "copy") and (row["src_rule"]):
             print(f"copy {clonecmd}")
+            print(f"move {corecmd} {row['position']} \"{row['relation_to']}\"")
+        elif (row["operation"] == "create"):
+            print(f"set {corecmd}")
             print(f"move {corecmd} {row['position']} \"{row['relation_to']}\"")
         if row["disabled"]:
             print(f"set {corecmd} disabled {row['disabled']}")
@@ -149,10 +152,10 @@ def security_cli():  # TODO - Finish Security Policy CLI Function
 
 def addresses_cli():
     # Process Addresses Table
-    header1("Print the Addresses dataframe")
-    print(addr_df)
+    #header1("Print the Addresses dataframe")
+    #print(addr_df)
     for _, row in addr_df.iterrows():
-        header2(f"Add / Modify {row['name']}")
+        header2(f"Add / Modify Address: {row['name']}")
         corecmd = "address " + row["name"]
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + corecmd
@@ -166,16 +169,16 @@ def addresses_cli():
 
 def addressgroups_cli():
     # Process Address Groups Table
-    header1("Print the Address Groups dataframe")
-    print(addrgrp_df)
+    #header1("Print the Address Groups dataframe")
+    #print(addrgrp_df)
     for _, row in addrgrp_df.iterrows():
-        header2(f"Add / Modify {row['name']}")
+        header2(f"Add / Modify Address Group: {row['name']}")
         corecmd = "address-group " + row["name"]
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + corecmd
-        if row["type"] == "dynamic":
+        if (row["type"] == "dynamic") and (row["filter"]):
             print(f"set {corecmd} {row['type']} filter \"{row['filter']}\"")
-        else:
+        elif row["type"] == "static":
             if row["members_mod"] == "replace":
                  print(f"delete {corecmd} members" )
             print(f"set {corecmd} members [ {row['members']} ]")
@@ -188,10 +191,10 @@ def addressgroups_cli():
 
 def tags_cli():
     # Process Tags Table
-    header1("Print the Tags dataframe")
-    print(tag_df)
+    #header1("Print the Tags dataframe")
+    #print(tag_df)
     for _, row in tag_df.iterrows():
-        header2(f"Add / Modify {row['name']}")
+        header2(f"Add / Modify Tag: {row['name']}")
         corecmd = "tag " + row["name"]
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + corecmd
@@ -203,14 +206,18 @@ def tags_cli():
 
 def services_cli():
     # Process Services Table
-    header1("Print the Services dataframe")
-    print(service_df)
+    #header1("Print the Services dataframe")
+    #print(service_df)
     for _, row in service_df.iterrows():
-        header2(f"Add / Modify {row['name']}")
+        header2(f"Add / Modify Service: {row['name']}")
         corecmd = "service " + row["name"]
+        if row["operation"] == "move":
+            print(f"rename device-group {row['device-group']} service {row['source']} to {row['name']}")
+            continue
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + corecmd
-        svcproto = "protcol " + row["protocol"] + " port " + str(row["port"])
+        if row["port"]:
+            svcproto = "protocol " + row["protocol"] + " port " + str(int(row["port"]))
         if row["source-port"]:
             svcproto = svcproto + " source-port " + row["source-port"]
         print(f"set {corecmd} {svcproto}")
@@ -223,10 +230,10 @@ def services_cli():
 
 def servicegroups_cli():
     # Process Service Groups Table
-    header1("Print the ServiceGroups dataframe")
-    print(svcgrp_df)
+    #header1("Print the ServiceGroups dataframe")
+    #print(svcgrp_df)
     for _, row in svcgrp_df.iterrows():
-        header2(f"Add / Modify {row['name']}")
+        header2(f"Add / Modify Service Group: {row['name']}")
         corecmd = "service-group " + row["name"]
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + corecmd
@@ -240,8 +247,12 @@ def servicegroups_cli():
             print(f"set {corecmd} members [ {row['members']} ]")
 
 # File location:
-#file = r"xl-tmplt.xlsx"
-file = r"/Users/rcameron/Downloads/xl-tmplt.xlsx"
+geto
+#if sys.argv[1]:
+#    file = r"sys.argv[1]"
+#else:
+    #file = r"xl-tmplt.xlsx"
+file = r"/Users/rcameron/Desktop/Week25/xl2pan-week25.xlsx"
 
 # Run the function to return a dictionary of all tables in the Excel workbook
 tables_dict = get_all_tables(filename=file)
@@ -254,9 +265,13 @@ tag_df      =   pd.DataFrame(data=tables_dict['Tags']['dataframe'])
 service_df  =   pd.DataFrame(data=tables_dict['Services']['dataframe'])
 svcgrp_df   =   pd.DataFrame(data=tables_dict['ServiceGroups']['dataframe'])
 
-tags_cli()
-addresses_cli()
-addressgroups_cli()
-services_cli()
-servicegroups_cli()
-security_cli()
+# Debug argument list
+print ('Number of arguments:', len(sys.argv), 'arguments.')
+print ('Argument List:', str(sys.argv))
+
+#tags_cli()
+#addresses_cli()
+#addressgroups_cli()
+#services_cli()
+#servicegroups_cli()
+#security_cli()
