@@ -250,7 +250,7 @@ def servicegroups_cli():
 #if sys.argv[1]:
 #    file = r"sys.argv[1]"
 #else:
-file = r"xl-tmplt.xlsx"
+file = r"xl2pan - test-data.xlsx"
 #file = r"/Users/rcameron/Desktop/Week25/xl2pan-week25.xlsx"
 
 # Run the function to return a dictionary of all tables in the Excel workbook
