@@ -247,12 +247,11 @@ def servicegroups_cli():
             print(f"set {corecmd} members [ {row['members']} ]")
 
 # File location:
-geto
 #if sys.argv[1]:
 #    file = r"sys.argv[1]"
 #else:
-    #file = r"xl-tmplt.xlsx"
-file = r"/Users/rcameron/Desktop/Week25/xl2pan-week25.xlsx"
+file = r"xl-tmplt.xlsx"
+#file = r"/Users/rcameron/Desktop/Week25/xl2pan-week25.xlsx"
 
 # Run the function to return a dictionary of all tables in the Excel workbook
 tables_dict = get_all_tables(filename=file)
