@@ -18,7 +18,7 @@ __copyright__ = "Copyright 2020, Remove kp-all Policy Cleanup"
 __credits__ = ["Ron Cameron"]
 
 __license__ = '{license}'
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __maintainer__ = "Ron Cameron"
 __email__ = "rscameron@gmail.com"
 __status__ = '{dev_status}'
@@ -28,13 +28,13 @@ __status__ = '{dev_status}'
 # […]
 
 # Built-in/Generic Imports
-#import os
-import sys, getopt
-# […]
+import sys
+import os
+import pandas as pd
 
 # Libs
 from openpyxl import load_workbook
-import pandas as pd
+# […]
 # […]
 
 # Own modules
@@ -100,7 +100,7 @@ def security_cli():  # TODO - Finish Security Policy CLI Function
     header1("Print the SecurityPolicy dataframe")
     print(security_df)
     for _, row in security_df.iterrows():
-        header2(f"{row['operation']} Security Policy: {row['name']}")
+        header2(f"{row['operation']} {row['device-group']} {row['dg_rulebase']} Security Policy: {row['name']}")
         corecmd = "rulebase security rules \"" + row["name"] + "\""
         clonecmd = "rulebase security rules \"" + str(row["src_rule"]) + "\" to \"" + row["name"] + "\""
         if row["device-group"]:
@@ -109,12 +109,14 @@ def security_cli():  # TODO - Finish Security Policy CLI Function
         if row["operation"] == "delete":
             print(f"delete {corecmd}")
             continue
-        if (row["operation"] == "copy") and (row["src_rule"]):
+        elif (row["operation"] == "copy") and (row["src_rule"]):
             print(f"copy {clonecmd}")
-            print(f"move {corecmd} {row['position']} \"{row['relation_to']}\"")
+            if (row["relation_to"]):
+                print(f"move {corecmd} {row['position']} \"{row['relation_to']}\"")
         elif (row["operation"] == "create"):
-            print(f"set {corecmd}")
-            print(f"move {corecmd} {row['position']} \"{row['relation_to']}\"")
+            print(f"set {corecmd} disabled no")
+            if (row["relation_to"]):
+                print(f"move {corecmd} {row['position']} \"{row['relation_to']}\"")
         if row["disabled"]:
             print(f"set {corecmd} disabled {row['disabled']}")
         if row["tag_mod"] == "replace": 
@@ -177,7 +179,7 @@ def addressgroups_cli():
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + corecmd
         if (row["type"] == "dynamic") and (row["filter"]):
-            print(f"set {corecmd} {row['type']} filter \"{row['filter']}\"")
+            print(f"set {corecmd} {row['type']} filter \"\'{row['filter']}\"")
         elif row["type"] == "static":
             if row["members_mod"] == "replace":
                  print(f"delete {corecmd} members" )
@@ -247,11 +249,12 @@ def servicegroups_cli():
             print(f"set {corecmd} members [ {row['members']} ]")
 
 # File location:
-#if sys.argv[1]:
-#    file = r"sys.argv[1]"
-#else:
-file = r"xl2pan - test-data.xlsx"
-#file = r"/Users/rcameron/Desktop/Week25/xl2pan-week25.xlsx"
+if sys.argv[1]:
+    file = (sys.argv[1])
+    #print(f"file is: {file}")
+else:
+#file = r"xl2pan - test-data.xlsx"
+    file = r"/Users/rcameron/Desktop/Week25/xl2pan-week25.xlsx"
 
 # Run the function to return a dictionary of all tables in the Excel workbook
 tables_dict = get_all_tables(filename=file)
@@ -268,9 +271,9 @@ svcgrp_df   =   pd.DataFrame(data=tables_dict['ServiceGroups']['dataframe'])
 print ('Number of arguments:', len(sys.argv), 'arguments.')
 print ('Argument List:', str(sys.argv))
 
-#tags_cli()
-#addresses_cli()
-#addressgroups_cli()
+tags_cli()
+addresses_cli()
+addressgroups_cli()
 #services_cli()
 #servicegroups_cli()
-#security_cli()
+security_cli()
