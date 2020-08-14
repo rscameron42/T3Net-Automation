@@ -172,7 +172,7 @@ def addresses_cli():
 def addressgroups_cli():
     # Process Address Groups Table
     #header1("Print the Address Groups dataframe")
-    #print(addrgrp_df)
+    print(addrgrp_df)
     for _, row in addrgrp_df.iterrows():
         header2(f"Add / Modify Address Group: {row['name']}")
         corecmd = "address-group " + row["name"]

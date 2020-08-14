@@ -4,7 +4,9 @@
 - [x] ServiceGroup Function
 - [x] Initial versioned GitHub push
 #### 1.0.2
-- [ ] SecurityPolicy Function
+- [x] SecurityPolicy Function
 #### 1.0.3
-- [ ] Input file to be command argument instead of hard-coded
+- [x] Input file to be command argument instead of hard-coded
 - [ ] Add flags for vebose text
+- [ ] Account for capitalized case in modification type - "Replace" gets skipped but "replace" doesn't
+- [ ] Account for blank object tables with on empty line
