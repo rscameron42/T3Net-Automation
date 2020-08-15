@@ -158,16 +158,18 @@ def addresses_cli():
     #print(addr_df)
     for _, row in addr_df.iterrows():
         header2(f"Add / Modify Address: {row['name']}")
-        corecmd = "address " + row["name"]
+        corecmd = "address"
         if row["device-group"]:
             corecmd = "device-group " + row["device-group"] + " " + corecmd
-        print(f"set {corecmd} {row['type']} {row['address']}")
+        if (row["operation"] == "edit") and (row["source"]):
+            print(f"rename {corecmd} {row['source']} to {row['name']}")
+        print(f"set {corecmd} {row['name']} {row['type']} {row['address']}")
         if row["tag_mod"] == "replace": 
-            print(f"delete {corecmd} tag" ) 
+            print(f"delete {corecmd} {row['name']} tag" ) 
         if row["tag"]:
-            print(f"set {corecmd} tag [ {row['tag']} ]")
+            print(f"set {corecmd} {row['name']} tag [ {row['tag']} ]")
         if row["description"]:
-            print(f"set {corecmd} description \"{row['description']}\"")
+            print(f"set {corecmd} {row['name']} description \"{row['description']}\"")
 
 def addressgroups_cli():
     # Process Address Groups Table
